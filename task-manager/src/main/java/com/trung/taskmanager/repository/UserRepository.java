@@ -12,7 +12,6 @@ public class UserRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
-    // Spring tự động tiêm (inject) JdbcTemplate vào đây
     public UserRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -28,7 +27,7 @@ public class UserRepository {
     };
 
     public Optional<User> findByUsername(String username) {
-        // Sử dụng Text Blocks (""") của Modern Java để viết SQL dễ nhìn
+        // Sử dụng Text Blocks (""")
         var sql = """
                   SELECT id, username, password, role 
                   FROM users 
@@ -36,11 +35,10 @@ public class UserRepository {
                   """;
 
         try {
-            // Dấu '?' giúp chống lại bẫy phỏng vấn: Lỗ hổng SQL Injection
             User user = jdbcTemplate.queryForObject(sql, userRowMapper, username);
             return Optional.ofNullable(user);
         } catch (Exception e) {
-            return Optional.empty(); // Không tìm thấy
+            return Optional.empty();
         }
     }
 

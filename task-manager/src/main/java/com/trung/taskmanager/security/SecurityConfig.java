@@ -16,7 +16,6 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    // Tiêm bộ lọc vào đây
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
@@ -25,13 +24,12 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                // QUAN TRỌNG: Thiết lập Stateless (Không lưu session)
+                // Thiết lập Stateless (Không lưu session)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/register", "/api/auth/login","/error").permitAll()
                         .anyRequest().authenticated()
                 )
-                // LẮP TRẠM KIỂM SOÁT: Đẩy bộ lọc JWT lên trước bộ lọc đăng nhập mặc định
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

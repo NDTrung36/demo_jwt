@@ -38,17 +38,16 @@ public class TaskRepository {
                 task.getStatus(), task.getUserId());
     }
 
-    // BỔ SUNG: Hàm lấy danh sách công việc của 1 User cụ thể
+    // lấy danh sách công việc của 1 User cụ thể
     public List<Task> findByUserId(Long userId) {
         var sql = """
                   SELECT id, title, description, status, user_id 
                   FROM tasks 
                   WHERE user_id = ?
                   """;
-        // Dùng query() thay vì queryForObject() vì kết quả trả về có thể là nhiều dòng (List)
         return jdbcTemplate.query(sql, taskRowMapper, userId);
     }
-    // 1. Tìm Task theo ID
+
     public Optional<Task> findById(Long taskId) {
         var sql = """
               SELECT id, title, description, status, user_id 
@@ -56,15 +55,13 @@ public class TaskRepository {
               WHERE id = ?
               """;
         try {
-            // Tái sử dụng taskRowMapper bạn đã định nghĩa sẵn ở trên
             Task task = jdbcTemplate.queryForObject(sql, taskRowMapper, taskId);
             return Optional.ofNullable(task);
         } catch (Exception e) {
-            return Optional.empty(); // Không tìm thấy Task
+            return Optional.empty();
         }
     }
 
-    // 2. Cập nhật Task
     public int update(Task task) {
         var sql = """
               UPDATE tasks 
@@ -75,7 +72,6 @@ public class TaskRepository {
                 task.getStatus(), task.getId());
     }
 
-    // 3. Xóa Task
     public int delete(Long taskId) {
         var sql = """
               DELETE FROM tasks 
