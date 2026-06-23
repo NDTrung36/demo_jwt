@@ -1,82 +1,63 @@
 package com.trung.taskmanager.repository;
 
 import com.trung.taskmanager.model.Task;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Repository
+@Transactional
 public class TaskRepository {
 
-    private final JdbcTemplate jdbcTemplate;
-
-    public TaskRepository(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
-
-    // Đã đổi tên thành taskRowMapper và sửa lại tên cột user_id
-    private final RowMapper<Task> taskRowMapper = (rs, rowNum) -> {
-        var task = new Task();
-        task.setId(rs.getLong("id"));
-        task.setTitle(rs.getString("title"));
-        task.setDescription(rs.getString("description"));
-        task.setStatus(rs.getString("status"));
-        task.setUserId(rs.getLong("user_id")); // Khớp với DB
-        return task;
-    };
+    @PersistenceContext
+    private EntityManager em;
 
     public int save(Task task) {
-        // Sửa lại tên bảng (tasks) và tên cột (user_id)
-        var sql = """
-                  INSERT INTO tasks (title, description, status, user_id) 
-                  VALUES (?, ?, ?, ?)
-                  """;
-        return jdbcTemplate.update(sql, task.getTitle(), task.getDescription(),
-                task.getStatus(), task.getUserId());
-    }
-
-    // lấy danh sách công việc của 1 User cụ thể
-    public List<Task> findByUserId(Long userId) {
-        var sql = """
-                  SELECT id, title, description, status, user_id 
-                  FROM tasks 
-                  WHERE user_id = ?
-                  """;
-        return jdbcTemplate.query(sql, taskRowMapper, userId);
-    }
-
-    public Optional<Task> findById(Long taskId) {
-        var sql = """
-              SELECT id, title, description, status, user_id 
-              FROM tasks 
-              WHERE id = ?
-              """;
         try {
-            Task task = jdbcTemplate.queryForObject(sql, taskRowMapper, taskId);
-            return Optional.ofNullable(task);
+            em.persist(task); // Tự động sinh INSERT
+            return 1;
         } catch (Exception e) {
-            return Optional.empty();
+            return 0;
         }
     }
 
+    public List<Task> findByUserId(Long userId) {
+        var hql = "SELECT t FROM Task t WHERE t.userId = :userId";
+        return em.createQuery(hql, Task.class)
+                .setParameter("userId", userId)
+                .getResultList();
+    }
+
+    public Optional<Task> findById(Long taskId) {
+        // Lệnh find() của em sẽ tự động tạo lệnh SELECT * FROM tasks WHERE id = ?
+        Task task = em.find(Task.class, taskId);
+        return Optional.ofNullable(task);
+    }
+
     public int update(Task task) {
-        var sql = """
-              UPDATE tasks 
-              SET title = ?, description = ?, status = ? 
-              WHERE id = ?
-              """;
-        return jdbcTemplate.update(sql, task.getTitle(), task.getDescription(),
-                task.getStatus(), task.getId());
+        try {
+            // merge = Hibernate sẽ so sánh Object hiện tại với DB và tự sinh lệnh UPDATE
+            em.merge(task);
+            return 1;
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
     public int delete(Long taskId) {
-        var sql = """
-              DELETE FROM tasks 
-              WHERE id = ?
-              """;
-        return jdbcTemplate.update(sql, taskId);
+        try {
+            Task task = em.find(Task.class, taskId);
+            if (task != null) {
+                em.remove(task); // Tự động sinh DELETE
+                return 1;
+            }
+            return 0;
+        } catch (Exception e) {
+            return 0;
+        }
     }
 }

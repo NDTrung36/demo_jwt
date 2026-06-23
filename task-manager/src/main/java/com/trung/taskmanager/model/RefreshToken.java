@@ -6,27 +6,26 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
+
 @Entity
-@Table(name = "tasks")
+@Table(name = "refresh_tokens")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Task {
+public class RefreshToken {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String title;
-
-    @Column(columnDefinition = "TEXT") // Ép kiểu dưới DB là dạng TEXT để chứa mô tả dài
-    private String description;
+    @Column(nullable = false, unique = true)
+    private String token;
 
     @Column(nullable = false)
-    private String status;
+    private Instant expiryDate;
 
-    @Column(name = "user_id", nullable = false) // Đảm bảo tên cột dưới DB là user_id
+    @Column(name = "user_id", nullable = false)
     private Long userId;
 }

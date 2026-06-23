@@ -1,52 +1,53 @@
 package com.trung.taskmanager.repository;
 
 import com.trung.taskmanager.model.User;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 @Repository
+@Transactional // BẮT BUỘC: Đánh dấu class này cần mở một giao dịch (Transaction) với Database
 public class UserRepository {
 
-    private final JdbcTemplate jdbcTemplate;
-
-    public UserRepository(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
-
-    // RowMapper: "Dịch" 1 dòng trong ResultSet (MySQL) thành 1 Object User trên vùng nhớ Heap
-    private final RowMapper<User> userRowMapper = (rs, rowNum) -> {
-        var user = new User();
-        user.setId(rs.getLong("id"));
-        user.setUsername(rs.getString("username"));
-        user.setPassword(rs.getString("password"));
-        user.setRole(rs.getString("role"));
-        return user;
-    };
+    // Tiêm "Cỗ máy" quản lý thực thể của Hibernate vào đây
+    @PersistenceContext
+    private EntityManager em;
 
     public Optional<User> findByUsername(String username) {
-        // Sử dụng Text Blocks (""")
-        var sql = """
-                  SELECT id, username, password, role 
-                  FROM users 
-                  WHERE username = ?
-                  """;
+        // Đây là HQL (Hibernate Query Language) - Ta truy vấn trên Class User, không phải bảng 'users'
+        var hql = "SELECT u FROM User u WHERE u.username = :username";
 
-        try {
-            User user = jdbcTemplate.queryForObject(sql, userRowMapper, username);
-            return Optional.ofNullable(user);
-        } catch (Exception e) {
-            return Optional.empty();
-        }
+        return em.createQuery(hql, User.class)
+                .setParameter("username", username)
+                .getResultStream()
+                .findFirst();
     }
 
     public int save(User user) {
-        var sql = """
-                  INSERT INTO users (username, password, role) 
-                  VALUES (?, ?, ?)
-                  """;
-        return jdbcTemplate.update(sql, user.getUsername(), user.getPassword(), user.getRole());
+        try {
+            // persist = Ra lệnh cho Hibernate theo dõi và tự sinh lệnh INSERT INTO...
+            em.persist(user);
+            return 1; // Thành công trả về 1
+        } catch (Exception e) {
+            return 0; // Thất bại trả về 0
+        }
+    }
+    // 1. Tìm User theo ID
+    public Optional<User> findById(Long id) {
+        User user = em.find(User.class, id);
+        return Optional.ofNullable(user);
+    }
+
+    // 2. Cập nhật User (Hibernate sẽ tự động so sánh và sinh lệnh UPDATE)
+    public int update(User user) {
+        try {
+            em.merge(user);
+            return 1;
+        } catch (Exception e) {
+            return 0;
+        }
     }
 }
