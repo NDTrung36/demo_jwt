@@ -19,7 +19,6 @@ public class TaskController {
         this.taskService = taskService;
     }
 
-    //POST /api/tasks
     @PostMapping
     public ResponseEntity<String> createTask(@RequestBody Task task) {
         UserPrincipal principal = (UserPrincipal) SecurityContextHolder.getContext()
@@ -61,7 +60,6 @@ public class TaskController {
         }
     }
 
-    // DELETE /api/tasks/{id}
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteTask(@PathVariable Long id) {
         UserPrincipal principal = (UserPrincipal) SecurityContextHolder.getContext()

@@ -36,7 +36,6 @@ public class RefreshTokenRepository {
     }
 
     public void delete(RefreshToken refreshToken) {
-        // Lệnh xóa an toàn của JPA
         em.remove(em.contains(refreshToken) ? refreshToken : em.merge(refreshToken));
     }
 }

@@ -16,17 +16,12 @@ public class UserController {
         this.userService = userService;
     }
 
-    // Record nhận dữ liệu từ Postman
     public record ChangePasswordRequest(String oldPassword, String newPassword) {}
 
-    /**
-     * API TỰ ĐỔI MẬT KHẨU CỦA CHÍNH MÌNH: PUT /api/users/me/password
-     */
     @PutMapping("/me/password")
     public ResponseEntity<String> changePassword(
             @RequestBody ChangePasswordRequest request,
             @AuthenticationPrincipal UserPrincipal principal) {
-        // @AuthenticationPrincipal tự động lôi thông tin User đang đăng nhập từ Token ra
 
         try {
             String result = userService.changePassword(

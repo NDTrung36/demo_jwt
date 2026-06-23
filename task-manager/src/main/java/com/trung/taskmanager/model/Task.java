@@ -21,12 +21,12 @@ public class Task {
     @Column(nullable = false)
     private String title;
 
-    @Column(columnDefinition = "TEXT") // Ép kiểu dưới DB là dạng TEXT để chứa mô tả dài
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @Column(nullable = false)
     private String status;
 
-    @Column(name = "user_id", nullable = false) // Đảm bảo tên cột dưới DB là user_id
+    @Column(name = "user_id", nullable = false)
     private Long userId;
 }

@@ -31,12 +31,10 @@ public class AuthController {
         return ResponseEntity.badRequest().body(result);
     }
 
-    // ... code cũ của AuthController ...
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest request) {
         try {
-            // Giờ đây hàm login trả về 1 object chứa cả 2 thẻ
             UserService.TokenResponse tokens = userService.login(request.username(), request.password());
             return ResponseEntity.ok(tokens);
         } catch (RuntimeException e) {
@@ -44,7 +42,6 @@ public class AuthController {
         }
     }
 
-    // Record hứng dữ liệu khi xin cấp lại vé
     public record RefreshTokenRequest(String refreshToken) {}
 
     @PostMapping("/refresh")
@@ -53,7 +50,7 @@ public class AuthController {
             UserService.TokenResponse tokens = userService.refreshToken(request.refreshToken());
             return ResponseEntity.ok(tokens);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(403).body(e.getMessage()); // 403 Forbidden
+            return ResponseEntity.status(403).body(e.getMessage());
         }
     }
 }

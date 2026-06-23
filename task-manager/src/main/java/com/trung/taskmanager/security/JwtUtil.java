@@ -16,33 +16,30 @@ public class JwtUtil {
 
     private final long EXPIRATION_TIME = 3600000;
 
-    // Chuyển chuỗi String thành SecretKey chuẩn thuật toán HMAC-SHA256
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(SECRET_STRING.getBytes(StandardCharsets.UTF_8));
     }
 
-    // TẠO TOKEN (IN VÉ)
     public String generateToken(long userId, String username, String role) {
         var now = new Date();
         var expiryDate = new Date(now.getTime() + EXPIRATION_TIME);
 
         return Jwts.builder()
                 .subject(username)
-                .claim("userId", userId)    // Đặt Sub (chủ thể) là username
-                .claim("role", role)                // Thêm dữ liệu tùy chỉnh (ví dụ: ROLE_USER)
-                .issuedAt(now)                      // Thời gian phát hành
-                .expiration(expiryDate)             // Thời gian hết hạn
-                .signWith(getSigningKey())          // Ký tên bằng Khóa bí mật
-                .compact();                         // Nén lại thành chuỗi chuỗi chữ và số ngăn cách bởi 2 dấu chấm
+                .claim("userId", userId)
+                .claim("role", role)
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .signWith(getSigningKey())
+                .compact();
     }
 
-    //GIẢI MÃ VÀ TRÍCH XUẤT DỮ LIỆU (ĐỌC VÉ)
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
-                .verifyWith(getSigningKey())        // Đưa khóa bí mật vào để máy quét đối chiếu chữ ký
+                .verifyWith(getSigningKey())
                 .build()
-                .parseSignedClaims(token)           // Nếu chữ ký giả mạo hoặc hết hạn, hàm này sẽ ném lỗi sập tại đây
-                .getPayload();                         // Nếu hợp lệ, trả về phần ruột (Payload)
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     public String extractUsername(String token) {

@@ -6,19 +6,19 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity // Báo cho Hibernate biết đây là một thực thể cần map xuống DB
-@Table(name = "users") // Chỉ định tên bảng dưới Database
+@Entity
+@Table(name = "users")
 @Getter
 @Setter
-@NoArgsConstructor // Lombok tự sinh Constructor rỗng (Bắt buộc phải có cho JPA)
-@AllArgsConstructor // Lombok tự sinh Constructor full tham số
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Tương đương AUTO_INCREMENT
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true) // Ràng buộc: Không được null, không được trùng
+    @Column(nullable = false, unique = true)
     private String username;
 
     @Column(nullable = false)
