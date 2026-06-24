@@ -18,16 +18,11 @@ public class TaskService {
 
     public String createTask(Task task, UserPrincipal principal) {
         task.setUserId(principal.id());
-
         if (task.getStatus() == null || task.getStatus().isBlank()) {
             task.setStatus("PENDING");
         }
-
-        int result = taskRepository.save(task);
-        if (result > 0) {
-            return "Tạo công việc thành công!";
-        }
-        return "Tạo công việc thất bại.";
+        taskRepository.save(task);
+        return "Tạo công việc thành công!";
     }
 
     public List<Task> getTasksForUser(UserPrincipal principal) {
@@ -46,11 +41,8 @@ public class TaskService {
         existingTask.setDescription(updatedTask.getDescription());
         existingTask.setStatus(updatedTask.getStatus());
 
-        int result = taskRepository.update(existingTask);
-        if (result > 0) {
-            return "Cập nhật công việc thành công!";
-        }
-        return "Cập nhật công việc thất bại.";
+        taskRepository.save(existingTask);
+        return "Cập nhật công việc thành công!";
     }
 
     public String deleteTask(Long taskId, UserPrincipal principal) {
@@ -61,10 +53,7 @@ public class TaskService {
             throw new RuntimeException("FORBIDDEN");
         }
 
-        int result = taskRepository.delete(taskId);
-        if (result > 0) {
-            return "Xóa công việc thành công!";
-        }
-        return "Xóa công việc thất bại.";
+        taskRepository.deleteById(taskId);
+        return "Xóa công việc thành công!";
     }
 }

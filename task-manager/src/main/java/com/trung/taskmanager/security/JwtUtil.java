@@ -15,6 +15,7 @@ public class JwtUtil {
     private final String SECRET_STRING = "Tr0ngCaiKhoLoCaiKhonCuaTrungIT2026!!!";
 
     private final long EXPIRATION_TIME = 3600000;
+    private final long REFRESH_EXPIRATION_TIME = 604800000L;
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(SECRET_STRING.getBytes(StandardCharsets.UTF_8));
@@ -40,6 +41,21 @@ public class JwtUtil {
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
+    }
+
+    public String generateRefreshToken(long userId, String username, String role) {
+        var now = new Date();
+        var expiryDate = new Date(now.getTime() + REFRESH_EXPIRATION_TIME);
+
+        return Jwts.builder()
+                .subject(username)
+                .claim("userId", userId)
+                .claim("role", role)
+                .claim("isRefreshToken", true) // Phân biệt với thẻ Access
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .signWith(getSigningKey())
+                .compact();
     }
 
     public String extractUsername(String token) {
